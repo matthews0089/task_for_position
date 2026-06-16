@@ -30,6 +30,14 @@ The API layer does not know about Playwright. Browser automation is isolated in 
 
 One browser/context/page is reused during the application lifetime. If Playwright reports a stale or unavailable browser, the operation is retried and the browser is recreated.
 
+The Tempail client first opens the JS-rendered page with Playwright and then reuses the same browser session/cookies to call Tempail's internal page APIs where available:
+
+- `url_api_kontrol` for inbox refresh
+- `url_api_oku` for reading a message
+- `url_api_yoket` for generating a fresh address
+
+DOM parsing remains as a fallback because these endpoints are not public API contracts and can change with the website.
+
 ## Local Run
 
 ```bash
@@ -135,4 +143,4 @@ Tests use FastAPI dependency overrides and mocked services. They do not open a b
 
 tempail.com is an external JS-rendered website. If the site changes its DOM, selectors in `app/automation/selectors.py` may require updates. The API is designed to return stable JSON errors instead of leaking Playwright stack traces to clients.
 
-tempail.com can also enable anti-bot verification for automated browser sessions. When that happens, the service returns `TEMP_MAIL_UNAVAILABLE` in the standard JSON error format. This is expected behavior for a dependency outside of the application's control. API contracts are covered by tests and mocked service dependencies, so the project can be reviewed without relying on live tempail.com availability.
+tempail.com can also enable anti-bot verification for automated browser sessions before the normal page and its internal API variables are available. When that happens, the service returns `TEMP_MAIL_UNAVAILABLE` in the standard JSON error format. This is expected behavior for a dependency outside of the application's control. API contracts are covered by tests and mocked service dependencies, so the project can be reviewed without relying on live tempail.com availability.
